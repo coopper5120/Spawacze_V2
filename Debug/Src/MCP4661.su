@@ -1,0 +1,6 @@
+MCP4661.c:36:6:MCP4661_IncrementWiper	16	static
+MCP4661.c:44:6:MCP4661_DecrementWiper	16	static
+MCP4661.c:52:6:MCP4661_SetWiper	24	static
+MCP4661.c:69:10:MCP4661_ReadWiper	32	static
+MCP4661.c:82:6:MCP4661_SetResistance	8	static
+MCP4661.c:100:10:MCP4661_ReadResistance	16	static
