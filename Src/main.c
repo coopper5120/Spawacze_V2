@@ -17,7 +17,6 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
@@ -76,7 +75,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-  
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -107,79 +105,38 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim14);
   HAL_ADC_Start_DMA(&hadc1,adcValue,ADC_CHANNELS_NUMBER);
+//  HAL_UART_Start_DMA(&huart1, uartFrame, sizeof(uartFrame));
   HAL_UART_Receive_IT(&huart1, &receivedData, 1);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	MCP4661_SetWiper(256,0,0);
+	MCP4661_SetWiper(256,0,1);
+	MCP4661_SetWiper(256,1,0);
+	MCP4661_SetWiper(256,1,1);
+	MCP4661_SetWiper(256,2,0);
+	MCP4661_SetWiper(256,2,1);
+	MCP4661_SetWiper(256,3,0);
+	MCP4661_SetWiper(256,3,1);
+	MCP4661_SetWiper(256,4,0);
+	MCP4661_SetWiper(256,4,1);
+	MCP4661_SetWiper(256,5,0);
+	MCP4661_SetWiper(256,5,1);
+
+
   while (1)
   {
-
-
-//	  HAL_UART_Transmit(&huart1,buffer,sizeof(buffer),1);
-//	  HAL_Delay(100);
-//	  continue;
-	//  HAL_UART_Transmit_DMA(&huart1,buffer,sizeof(buffer));
-	  for(uint16_t i = 0;i < 0x100;i++)
-	  {
-	//	  MCP4661_IncrementWiper(0,0);
-	//	  MCP4661_IncrementWiper(0,1);
-//
-//		MCP4661_IncrementWiper(1,1);
-//		MCP4661_IncrementWiper(1,0);
-//		MCP4661_IncrementWiper(2,1);
-//		MCP4661_IncrementWiper(2,0);
-//		MCP4661_IncrementWiper(3,1);
-//		MCP4661_IncrementWiper(3,0);
-//		MCP4661_IncrementWiper(4,1);
-//		MCP4661_IncrementWiper(4,0);
-//		MCP4661_IncrementWiper(5,1);
-//		MCP4661_IncrementWiper(5,0);
-//		MCP4661_IncrementWiper(6,1);
-//		MCP4661_IncrementWiper(6,0);
-		  HAL_Delay(50);
-//		  for(uint8_t i = 0; i < 13;i++)
-//		   	 			  {
-//		   	 				  adcValueFloat[i]=(adcValue[i]/4096.0)*3.3;
-//		   	 			  }
-
-
-	  }
-	  for(uint16_t i = 0;i < 0x100;i++)
-	 	  {
-	//	  MCP4661_DecrementWiper(0,0);
-		//  MCP4661_DecrementWiper(0,1);
-
-//		MCP4661_DecrementWiper(1,1);
-//		MCP4661_DecrementWiper(1,0);
-//		MCP4661_DecrementWiper(2,1);
-//		MCP4661_DecrementWiper(2,0);
-//		MCP4661_DecrementWiper(3,1);
-//		MCP4661_DecrementWiper(3,0);
-//		MCP4661_DecrementWiper(4,1);
-//		MCP4661_DecrementWiper(4,0);
-//		MCP4661_DecrementWiper(5,1);
-//		MCP4661_DecrementWiper(5,0);
-//		MCP4661_DecrementWiper(6,1);
-//		MCP4661_DecrementWiper(6,0);
-
-
-	 		  HAL_Delay(50);
-
-//	 		 for(uint8_t i = 0; i < 13;i++)
-//	 		  	 			  {
-//	 		  	 				  adcValueFloat[i]=(adcValue[i]/4096.0)*3.3;
-//	 		  	 			  }
-
-	 	  }
-
-
 
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+
+
+
   }
   /* USER CODE END 3 */
 }
@@ -193,11 +150,12 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** Configure the main internal regulator output voltage 
+  /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
@@ -205,23 +163,23 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 96;
+  RCC_OscInitStruct.PLL.PLLN = 84;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -252,7 +210,7 @@ void Error_Handler(void)
   * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
-{ 
+{
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */

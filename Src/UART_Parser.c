@@ -14,12 +14,11 @@
 volatile uint8_t receivedData;
 uint8_t measureFlag = 0;
 static parserstate_t parser_state = PARSED;
+ uint8_t uartFrame[28];
+extern uint32_t time = 0;
 
-uint16_t ADC_Mask;
-union uart_frame_t uartValue[ADC_CHANNELS_NUMBER];
-uint8_t  dataToSendAmount = 0;
 
-const char start_char =  START_CHAR;
+uint16_t test[11] = {1,2,3,4,5,6,7,8,9,10,11};///!!!
 
 //uint8_t ok_msg[] = "OK!\n\r";
 
@@ -64,12 +63,12 @@ void UART_Parse(uint8_t input)
 		}
 		else if(parser_state == READY)
 		{
-//				uint8_t channelNumber = (msg[0] & 0x0F)>>4;
-			uint8_t channelNumber = (msg[0] & 0x0F);
-			uint8_t potNumber = (channelNumber/2);
-			__enable_irq();
-			MCP4661_SetWiper(msg[2],potNumber,channelNumber%2);
-//				if(!measureFlag) 	HAL_UART_Transmit_IT(&huart1,ok_msg,sizeof(ok_msg));
+			/*Setting gain option is intentionally disabled*/
+//			uint8_t channelNumber = (msg[0] & 0x0F);
+//			uint8_t potNumber = (channelNumber/2);
+//			__enable_irq();
+//			MCP4661_SetWiper(msg[2],potNumber,channelNumber%2);
+
 			parser_state = PARSED;
 		}
 		break;
@@ -95,36 +94,37 @@ void UART_Parse(uint8_t input)
 		}
 		else if(parser_state == READY)
 		{
-			ADC_Mask = 0;
-			ADC_Mask = ((msg[0] & 0x0F)<<8) | msg[2];
-			__enable_irq();
+//			ADC_Mask = 0;
+//			ADC_Mask = ((msg[0] & 0x0F)<<8) | msg[2];
+//			__enable_irq();
 //			if(!measureFlag)	HAL_UART_Transmit_IT(&huart1,ok_msg,sizeof(ok_msg));
 //
 			parser_state = PARSED;
 		}
 		break;
-	case READ_CHANNELS_CMD:
-		if(parser_state == READY)
-		{
-			tmp[0] = ADC_Mask>>8;
-			tmp[1] = (uint8_t)(ADC_Mask & 0x00FF);
-			__enable_irq();
-			if(!measureFlag)	HAL_UART_Transmit_IT(&huart1,tmp,2);
-			parser_state = PARSED;
-		}
-		break;
-	case ENABLE_DSP_CMD:
-		break;
-	case DISABLE_DSP_CMD:
-		break;
-	case SET_DSP_COEFF_CMD:
-		break;
+//	case READ_CHANNELS_CMD:
+//		if(parser_state == READY)
+//		{
+//			tmp[0] = ADC_Mask>>8;
+//			tmp[1] = (uint8_t)(ADC_Mask & 0x00FF);
+//			__enable_irq();
+//			if(!measureFlag)	HAL_UART_Transmit_IT(&huart1,tmp,2);
+//			parser_state = PARSED;
+//		}
+//		break;
+//	case ENABLE_DSP_CMD:
+//		break;
+//	case DISABLE_DSP_CMD:
+//		break;
+//	case SET_DSP_COEFF_CMD:
+//		break;
 	case START_MEAS_CMD:
 		if(parser_state == CMD_OK)
 		{
 			measureFlag = 1;
-			UART_PrepareData();
-			HAL_UART_Transmit_IT(&huart1, uartValue, dataToSendAmount * 2);
+//			UART_PrepareData();
+//			HAL_UART_Transmit_IT(&huart1, uartValue, dataToSendAmount * 2);
+			time = 0;
 			parser_state = PARSED;
 		}
 		break;
@@ -148,37 +148,23 @@ void UART_Parse(uint8_t input)
 
 void UART_PrepareData()
 {
-	uint8_t counter = 0;
+	uartFrame[START_CHAR_POS] = START_CHAR;
+	memcpy((void*)&uartFrame[TIME_POS], (void*)&time, sizeof(time));
+	memcpy((void*)&uartFrame[MEASUREMENTS_POS], (void*)adcValue, sizeof(adcValue));
+	uartFrame[STOP_CHAR_POS] = STOP_CHAR;
 
-	for(uint8_t adcChannnelToSendNumber = 0; adcChannnelToSendNumber < ADC_CHANNELS_NUMBER; adcChannnelToSendNumber++)
-	{
-		if(ADC_Mask & (1<<adcChannnelToSendNumber))			// jesli kanal jest aktywny
-		{
-//			uartValue[counter].word = 0;
-//			uartValue[counter].word |= adcChannnelToSendNumber << 12;
-////			uartValue[counter].word |= adcValue[adcChannnelToSendNumber];
-//			uartValue[counter].word |= adcChannnelToSendNumber; //!!! TO JEST ZLE
-
-			uartValue[counter].word = 0;
-			uartValue[counter].byte[0] |= adcChannnelToSendNumber << 4;
-			uartValue[counter].byte[0] |=  adcValue[adcChannnelToSendNumber] >> 8 ;
-			uartValue[counter].byte[1] =  adcValue[adcChannnelToSendNumber] & 0xff;
-
-			if(uartValue[counter].byte[1] == 0xff) uartValue[counter].byte[1] = 0xfe;
-
-//			uartValue[counter].byte[0] |= adcValue[adcChannnelToSendNumber] >> 8 ;
-//			uartValue[counter].byte[1] = adcValue[adcChannnelToSendNumber] & 0x0f;
-
+//		uartFrame[START_CHAR_POS] = START_CHAR;
+//		time = 0;
+//		memcpy((void*)&uartFrame[TIME_POS], (void*)&time, sizeof(time));
 //
-//			uint8_t buff = uartValue[counter].byte[0];					// zamiana kolejnosci bajtow
-//			uartValue[counter].byte[0] = uartValue[counter].byte[1];
-//			uartValue[counter].byte[1] = buff;
+////		for(uint8_t i =0; i++; i<12) {	test[i] = i;}
+//
+//		memcpy((void*)&uartFrame[MEASUREMENTS_POS], (void*)test, sizeof(adcValue));
+//
+//		uartFrame[STOP_CHAR_POS] = STOP_CHAR;
 
-			counter++;
-		}
-	}
 
-	dataToSendAmount = counter;
+
 
 }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
